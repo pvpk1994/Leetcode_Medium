@@ -45,44 +45,58 @@ class Solution:
  # Challenge: Perform summation without modifying the input linked lists L1 and L2 
  # TC: O(N1+N2) and SC: O(1)
  class Solution:
-    def reverseList(self, head: ListNode) -> ListNode:
-        last = None
-        while head:
-            # keep the next node
-            tmp = head.next
-            # reverse the link
-            head.next = last
-            # update the last node and the current node
-            last = head
-            head = tmp
-        
-        return last
-    
     def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
-        # reverse lists
-        l1 = self.reverseList(l1)
-        l2 = self.reverseList(l2)
-        
-        head = None
-        carry = 0
-        while l1 or l2:
-            # get the current values 
-            x1 = l1.val if l1 else 0
-            x2 = l2.val if l2 else 0
+        # find the length of both lists
+        n1 = n2 = 0
+        curr1, curr2 = l1, l2
+        while curr1:
+            curr1 = curr1.next 
+            n1 += 1
+        while curr2:
+            curr2 = curr2.next 
+            n2 += 1
             
+        # parse both lists
+        # and sum the corresponding positions 
+        # without taking carry into account
+        # 3->3->3 + 7->7 --> 3->10->10 --> 10->10->3
+        curr1, curr2 = l1, l2
+        head = None
+        while n1 > 0 and n2 > 0:
+            val = 0
+            if n1 >= n2:
+                val += curr1.val 
+                curr1 = curr1.next 
+                n1 -= 1
+            if n1 < n2:
+                val += curr2.val 
+                curr2 = curr2.next
+                n2 -= 1
+                
+            # update the result: add to front
+            curr = ListNode(val)
+            curr.next = head
+            head = curr
+
+        # take the carry into account
+        # to have all elements to be less than 10
+        # 10->10->3 --> 0->1->4 --> 4->1->0
+        curr1, head = head, None
+        carry = 0
+        while curr1:
             # current sum and carry
-            val = (carry + x1 + x2) % 10
-            carry = (carry + x1 + x2) // 10
+            val = (curr1.val + carry) % 10
+            carry = (curr1.val + carry) // 10
             
             # update the result: add to front
             curr = ListNode(val)
             curr.next = head
             head = curr
-            
-            # move to the next elements in the lists
-            l1 = l1.next if l1 else None
-            l2 = l2.next if l2 else None
 
+            # move to the next elements in the list
+            curr1 = curr1.next
+        
+        # add the last carry
         if carry:
             curr = ListNode(carry)
             curr.next = head
